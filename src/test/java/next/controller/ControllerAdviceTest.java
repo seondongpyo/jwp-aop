@@ -51,6 +51,6 @@ class ControllerAdviceTest {
 
         dispatcher.service(request, response);
 
-        assertThat(response.getHeader("exception")).isEqualTo("handle IllegalArgumentException");
+        assertThat(response.getHeader("exception")).isEqualTo("handle RequiredLoginException in Controller");
     }
 }
