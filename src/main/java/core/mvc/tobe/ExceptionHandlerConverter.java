@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import next.security.LoginUserArgumentResolver;
 import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
 import org.springframework.core.ParameterNameDiscoverer;
 
@@ -23,6 +24,10 @@ public class ExceptionHandlerConverter {
 
     public void setArgumentResolvers(List<ArgumentResolver> argumentResolvers) {
         this.argumentResolvers.addAll(argumentResolvers);
+    }
+
+    public void addArgumentResolvers(ArgumentResolver argumentResolver) {
+        argumentResolvers.add(argumentResolver);
     }
 
     public Map<Class<? extends Throwable>, HandlerExecution> convert(Map<Class<?>, Object> handlers) {

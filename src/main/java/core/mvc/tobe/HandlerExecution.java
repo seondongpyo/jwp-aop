@@ -67,5 +67,7 @@ public class HandlerExecution {
         throw new IllegalStateException("No suitable resolver for argument: " + methodParameter.getType());
     }
 
-
+    public boolean isAnnotationPresent(Class<? extends Annotation> annotation) {
+        return target.getClass().isAnnotationPresent(annotation);
+    }
 }

@@ -1,25 +1,19 @@
 package next.controller;
 
-import static org.assertj.core.api.Assertions.*;
-
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-
+import core.di.context.support.AnnotationConfigApplicationContext;
+import core.mvc.DispatcherServlet;
+import core.mvc.tobe.*;
+import next.config.MyConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import core.di.context.support.AnnotationConfigApplicationContext;
-import core.mvc.DispatcherServlet;
-import core.mvc.tobe.AnnotationHandlerMapping;
-import core.mvc.tobe.ExceptionHandlerConverter;
-import core.mvc.tobe.ExceptionHandlerMapping;
-import core.mvc.tobe.HandlerConverter;
-import core.mvc.tobe.HandlerExecutionHandlerAdapter;
-import next.config.MyConfiguration;
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class ControllerAdviceTest {
 
@@ -34,8 +28,8 @@ class ControllerAdviceTest {
         dispatcher.addHandlerAdapter(new HandlerExecutionHandlerAdapter());
 
         ExceptionHandlerConverter exceptionHandlerConverter = ac.getBean(ExceptionHandlerConverter.class);
-        ExceptionHandlerMapping exceptionHandlerMapping = new ExceptionHandlerMapping(ac, exceptionHandlerConverter);
-        dispatcher.setExceptionHandlerMapping(exceptionHandlerMapping);
+        dispatcher.addExceptionHandlerMapping(new ControllerExceptionHandlerMapping(ac, exceptionHandlerConverter));
+        dispatcher.addExceptionHandlerMapping(new ControllerAdviceExceptionHandlerMapping(ac, exceptionHandlerConverter));
     }
 
     @DisplayName("RequiredLoginException 예외가 발생하면 로그인 페이지로 이동한다.")
@@ -47,5 +41,16 @@ class ControllerAdviceTest {
         dispatcher.service(request, response);
 
         assertThat(response.getRedirectedUrl()).isEqualTo("/users/loginForm");
+    }
+    
+    @DisplayName("@Controller 내부의 @ExceptionHandler 로 예외 처리")
+    @Test
+    void handleExceptionByController() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/exception-controller");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        dispatcher.service(request, response);
+
+        assertThat(response.getHeader("exception")).isEqualTo("handle IllegalArgumentException");
     }
 }

@@ -37,6 +37,7 @@ public class MyConfiguration {
     public ExceptionHandlerConverter exceptionHandlerConverter() {
         ExceptionHandlerConverter exceptionHandlerConverter = new ExceptionHandlerConverter();
         exceptionHandlerConverter.setArgumentResolvers(defaultArgumentResolvers());
+        exceptionHandlerConverter.addArgumentResolvers(loginUserArgumentResolver());
         return exceptionHandlerConverter;
     }
 

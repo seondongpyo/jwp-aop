@@ -1,19 +1,18 @@
 package core.mvc;
 
-import java.io.IOException;
-import java.util.Optional;
+import core.mvc.tobe.ExceptionHandlerMapping;
+import core.mvc.tobe.ExceptionHandlerMappingRegistry;
+import core.mvc.tobe.HandlerExecution;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
-
-import core.mvc.tobe.ExceptionHandlerMapping;
-import core.mvc.tobe.HandlerExecution;
+import java.io.IOException;
+import java.util.Optional;
 
 public class DispatcherServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
@@ -25,7 +24,7 @@ public class DispatcherServlet extends HttpServlet {
 
     private HandlerExecutor handlerExecutor = new HandlerExecutor(handlerAdapterRegistry);
 
-    private ExceptionHandlerMapping exceptionHandlerMapping;
+    private ExceptionHandlerMappingRegistry exceptionHandlerMappingRegistry = new ExceptionHandlerMappingRegistry();
 
     public void addHandlerMapping(HandlerMapping handlerMapping) {
         handlerMappingRegistry.addHandlerMpping(handlerMapping);
@@ -35,8 +34,8 @@ public class DispatcherServlet extends HttpServlet {
         handlerAdapterRegistry.addHandlerAdapter(handlerAdapter);
     }
 
-    public void setExceptionHandlerMapping(ExceptionHandlerMapping exceptionHandlerMapping) {
-        this.exceptionHandlerMapping = exceptionHandlerMapping;
+    public void addExceptionHandlerMapping(ExceptionHandlerMapping exceptionHandlerMapping) {
+        exceptionHandlerMappingRegistry.addExceptionHandlerMapping(exceptionHandlerMapping);
     }
 
     @Override
@@ -77,11 +76,11 @@ public class DispatcherServlet extends HttpServlet {
         }
     }
 
-    private HandlerExecution getExceptionHandler(Object handler, Throwable throwable) {
-        HandlerExecution exceptionHandler = exceptionHandlerMapping.getControllerExceptionHandler(handler.getClass());
-        if (exceptionHandler != null) {
-            return exceptionHandler;
+    private HandlerExecution getExceptionHandler(Object handler, Throwable throwable) throws ServletException {
+        Optional<HandlerExecution> maybeExceptionHandler = exceptionHandlerMappingRegistry.getExceptionHandler(handler, throwable);
+        if (maybeExceptionHandler.isPresent()) {
+            return maybeExceptionHandler.get();
         }
-        return exceptionHandlerMapping.getControllerAdviceExceptionHandler(throwable.getClass());
+        throw new ServletException(throwable);
     }
 }
