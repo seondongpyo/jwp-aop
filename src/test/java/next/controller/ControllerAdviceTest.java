@@ -1,0 +1,58 @@
+package next.controller;
+
+import core.di.context.support.AnnotationConfigApplicationContext;
+import core.mvc.DispatcherServlet;
+import core.mvc.tobe.*;
+import next.config.MyConfiguration;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
+
+import javax.servlet.ServletException;
+import java.io.IOException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ControllerAdviceTest {
+
+    private DispatcherServlet dispatcher;
+
+    @BeforeEach
+    void setUp() {
+        AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(MyConfiguration.class);
+        AnnotationHandlerMapping ahm = new AnnotationHandlerMapping(ac, ac.getBean(HandlerConverter.class));
+        dispatcher.addHandlerMapping(ahm);
+        dispatcher.addHandlerAdapter(new HandlerExecutionHandlerAdapter());
+
+        ExceptionHandlerConverter exceptionHandlerConverter = ac.getBean(ExceptionHandlerConverter.class);
+        DispatcherServlet dispatcher = new DispatcherServlet();
+        dispatcher.addExceptionHandlerMapping(new ControllerExceptionHandlerMapping(ac, exceptionHandlerConverter));
+        dispatcher.addExceptionHandlerMapping(new ControllerAdviceExceptionHandlerMapping(ac, exceptionHandlerConverter));
+    }
+
+    @DisplayName("@ControllerAdvice, @ExceptionHandler 를 활용하여 예외를 처리한다.")
+    @Test
+    void loginRequired() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest("POST", "/questions");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        dispatcher.service(request, response);
+
+        assertThat(response.getHeader("message")).isNull();
+        assertThat(response.getRedirectedUrl()).isEqualTo("/users/loginForm");
+    }
+
+    @DisplayName("@Controller 와 @ControllerAdvice 모두 @ExceptionHandler 를 포함하면, @Controller 의 @ExceptionHandler 가 우선적으로 동작한다.")
+    @Test
+    void handleByController() throws ServletException, IOException {
+        MockHttpServletRequest request = new MockHttpServletRequest("GET", "/login-required");
+        MockHttpServletResponse response = new MockHttpServletResponse();
+
+        dispatcher.service(request, response);
+
+        assertThat(response.getHeader("message")).isEqualTo("handle RequiredLoginException in controller");
+        assertThat(response.getRedirectedUrl()).isEqualTo("/users/loginForm");
+    }
+}

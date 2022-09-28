@@ -68,4 +68,7 @@ public class HandlerExecution {
     }
 
 
+    public Class<?> getTargetClass() {
+        return this.target.getClass();
+    }
 }
