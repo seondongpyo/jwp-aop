@@ -5,6 +5,7 @@ import core.mvc.tobe.ExceptionHandlerMappingRegistry;
 import core.mvc.tobe.HandlerExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.AnnotationAwareOrderComparator;
 import org.springframework.http.HttpStatus;
 
 import javax.servlet.ServletException;
@@ -36,6 +37,10 @@ public class DispatcherServlet extends HttpServlet {
 
     public void addExceptionHandlerMapping(ExceptionHandlerMapping exceptionHandlerMapping) {
         exceptionHandlerMappingRegistry.addExceptionHandlerMapping(exceptionHandlerMapping);
+    }
+
+    public void initStrategiesByExceptionHandlers() {
+        exceptionHandlerMappingRegistry.initExceptionHandlerMappings();
     }
 
     @Override

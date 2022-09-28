@@ -23,13 +23,20 @@ class ControllerAdviceTest {
     void setUp() {
         AnnotationConfigApplicationContext ac = new AnnotationConfigApplicationContext(MyConfiguration.class);
         AnnotationHandlerMapping ahm = new AnnotationHandlerMapping(ac, ac.getBean(HandlerConverter.class));
+
+        ExceptionHandlerConverter converter = ac.getBean(ExceptionHandlerConverter.class);
+        AbstractExceptionHandlerMapping controllerExceptionHandlerMapping = new ControllerExceptionHandlerMapping(ac, converter);
+        controllerExceptionHandlerMapping.setOrder(0);
+        AbstractExceptionHandlerMapping controllerAdviceExceptionHandlerMapping = new ControllerAdviceExceptionHandlerMapping(ac, converter);
+        controllerAdviceExceptionHandlerMapping.setOrder(1);
+
         dispatcher = new DispatcherServlet();
         dispatcher.addHandlerMapping(ahm);
         dispatcher.addHandlerAdapter(new HandlerExecutionHandlerAdapter());
+        dispatcher.addExceptionHandlerMapping(controllerAdviceExceptionHandlerMapping);
+        dispatcher.addExceptionHandlerMapping(controllerExceptionHandlerMapping);
 
-        ExceptionHandlerConverter converter = ac.getBean(ExceptionHandlerConverter.class);
-        dispatcher.addExceptionHandlerMapping(new ControllerExceptionHandlerMapping(ac, converter));
-        dispatcher.addExceptionHandlerMapping(new ControllerAdviceExceptionHandlerMapping(ac, converter));
+        dispatcher.initStrategiesByExceptionHandlers();
     }
 
     @DisplayName("@ControllerAdvice 의 @ExceptionHandler 로 예외를 처리한다.")

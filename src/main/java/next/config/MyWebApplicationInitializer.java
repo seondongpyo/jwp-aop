@@ -25,14 +25,20 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
         ahm.initialize();
 
         ExceptionHandlerConverter exceptionHandlerConverter = ac.getBean(ExceptionHandlerConverter.class);
+        AbstractExceptionHandlerMapping controllerExceptionHandlerMapping = new ControllerExceptionHandlerMapping(ac, exceptionHandlerConverter);
+        controllerExceptionHandlerMapping.setOrder(0);
+        AbstractExceptionHandlerMapping controllerAdviceExceptionHandlerMapping = new ControllerAdviceExceptionHandlerMapping(ac, exceptionHandlerConverter);
+        controllerExceptionHandlerMapping.setOrder(1);
 
         DispatcherServlet dispatcherServlet = new DispatcherServlet();
         dispatcherServlet.addHandlerMapping(ahm);
         dispatcherServlet.addHandlerMapping(new RequestMapping());
         dispatcherServlet.addHandlerAdapter(new HandlerExecutionHandlerAdapter());
         dispatcherServlet.addHandlerAdapter(new ControllerHandlerAdapter());
-        dispatcherServlet.addExceptionHandlerMapping(new ControllerExceptionHandlerMapping(ac, exceptionHandlerConverter));
-        dispatcherServlet.addExceptionHandlerMapping(new ControllerAdviceExceptionHandlerMapping(ac, exceptionHandlerConverter));
+        dispatcherServlet.addExceptionHandlerMapping(controllerExceptionHandlerMapping);
+        dispatcherServlet.addExceptionHandlerMapping(controllerAdviceExceptionHandlerMapping);
+
+        dispatcherServlet.initStrategiesByExceptionHandlers();
 
         ServletRegistration.Dynamic dispatcher = servletContext.addServlet("dispatcher", dispatcherServlet);
         dispatcher.setLoadOnStartup(1);

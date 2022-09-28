@@ -7,7 +7,11 @@ import java.util.Objects;
 
 public class ExceptionHandlerMappingRegistry {
 
-    private final List<ExceptionHandlerMapping> mappings = Lists.newLinkedList();
+    private final List<ExceptionHandlerMapping> mappings = Lists.newArrayList();
+
+    public void initExceptionHandlerMappings() {
+        OrderComparator.sort(mappings);
+    }
 
     public void addExceptionHandlerMapping(ExceptionHandlerMapping mapping) {
         this.mappings.add(mapping);

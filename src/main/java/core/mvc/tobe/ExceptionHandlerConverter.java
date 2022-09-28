@@ -24,8 +24,8 @@ public class ExceptionHandlerConverter {
         this.argumentResolvers.addAll(argumentResolvers);
     }
 
-    public Map<Class<?>, ExceptionHandlerExecution> convert(Map<Class<?>, Object> handlers) {
-        Map<Class<?>, ExceptionHandlerExecution> exceptionHandlers = Maps.newHashMap();
+    public Map<Class<?>, HandlerExecution> convert(Map<Class<?>, Object> handlers) {
+        Map<Class<?>, HandlerExecution> exceptionHandlers = Maps.newHashMap();
         Set<Class<?>> handlerClasses = handlers.keySet();
         for (Class<?> handlerClass : handlerClasses) {
             Object target = handlers.get(handlerClass);
@@ -34,19 +34,18 @@ public class ExceptionHandlerConverter {
         return exceptionHandlers;
     }
 
-    private void addHandlerExecution(Map<Class<?>, ExceptionHandlerExecution> exceptionHandlers, Object target, Method[] methods) {
+    private void addHandlerExecution(Map<Class<?>, HandlerExecution> exceptionHandlers, Object target, Method[] methods) {
         Arrays.stream(methods)
             .filter(method -> method.isAnnotationPresent(ExceptionHandler.class))
             .forEach(method -> addExceptionHandler(exceptionHandlers, target, method));
     }
 
-    private void addExceptionHandler(Map<Class<?>, ExceptionHandlerExecution> exceptionHandlers, Object target, Method method) {
+    private void addExceptionHandler(Map<Class<?>, HandlerExecution> exceptionHandlers, Object target, Method method) {
         ExceptionHandler exceptionHandler = method.getAnnotation(ExceptionHandler.class);
         Class<? extends Throwable>[] exceptionClasses = exceptionHandler.value();
         for (Class<? extends Throwable> exceptionClass : exceptionClasses) {
-            ExceptionHandlerExecution handlerExecution = new ExceptionHandlerExecution(nameDiscoverer, argumentResolvers, target, method, exceptionClass);
-            Class<?> key = getKey(target, exceptionClass);
-            exceptionHandlers.put(key, handlerExecution);
+            HandlerExecution handlerExecution = new HandlerExecution(nameDiscoverer, argumentResolvers, target, method);
+            exceptionHandlers.put(exceptionClass, handlerExecution);
         }
     }
 

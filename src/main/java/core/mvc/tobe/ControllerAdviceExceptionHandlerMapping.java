@@ -1,17 +1,19 @@
 package core.mvc.tobe;
 
 import com.google.common.collect.Maps;
-import core.annotation.web.Controller;
 import core.annotation.web.ControllerAdvice;
 import core.di.context.ApplicationContext;
 
 import java.util.Map;
 
-public class ControllerAdviceExceptionHandlerMapping implements ExceptionHandlerMapping {
+public class ControllerAdviceExceptionHandlerMapping extends AbstractExceptionHandlerMapping {
 
     private final Map<Class<?>, HandlerExecution> handlers = Maps.newHashMap();
 
     public ControllerAdviceExceptionHandlerMapping(ApplicationContext applicationContext, ExceptionHandlerConverter converter) {
+        if (applicationContext == null && converter == null) {
+            return;
+        }
         Map<Class<?>, Object> controllerAdvices = applicationContext.getBeansAnnotatedWith(ControllerAdvice.class);
         handlers.putAll(converter.convert(controllerAdvices));
     }
