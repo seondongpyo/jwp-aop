@@ -27,9 +27,9 @@ class ControllerAdviceTest {
         dispatcher.addHandlerMapping(ahm);
         dispatcher.addHandlerAdapter(new HandlerExecutionHandlerAdapter());
 
-        ExceptionHandlerConverter exceptionHandlerConverter = ac.getBean(ExceptionHandlerConverter.class);
-        ExceptionHandlerMappings exceptionHandlerMappings = new ExceptionHandlerMappings(ac, exceptionHandlerConverter);
-        dispatcher.setExceptionHandlerMapping(exceptionHandlerMappings);
+        ExceptionHandlerConverter converter = ac.getBean(ExceptionHandlerConverter.class);
+        dispatcher.addExceptionHandlerMapping(new ControllerExceptionHandlerMapping(ac, converter));
+        dispatcher.addExceptionHandlerMapping(new ControllerAdviceExceptionHandlerMapping(ac, converter));
     }
 
     @DisplayName("@ControllerAdvice 의 @ExceptionHandler 로 예외를 처리한다.")

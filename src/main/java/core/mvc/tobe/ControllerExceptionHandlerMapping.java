@@ -8,7 +8,7 @@ import java.util.Map;
 
 public class ControllerExceptionHandlerMapping implements ExceptionHandlerMapping {
 
-    private final Map<Class<?>, ExceptionHandlerExecution> handlers = Maps.newHashMap();
+    private final Map<Class<?>, HandlerExecution> handlers = Maps.newHashMap();
 
     public ControllerExceptionHandlerMapping(ApplicationContext applicationContext, ExceptionHandlerConverter converter) {
         Map<Class<?>, Object> controllers = applicationContext.getBeansAnnotatedWith(Controller.class);
@@ -16,8 +16,8 @@ public class ControllerExceptionHandlerMapping implements ExceptionHandlerMappin
     }
 
     @Override
-    public ExceptionHandlerExecution getExceptionHandler(Object key) {
-        HandlerExecution handler = (HandlerExecution) key;
-        return handlers.get(handler.getTargetClass());
+    public HandlerExecution getExceptionHandler(Object handler, Throwable throwable) {
+        HandlerExecution handlerExecution = (HandlerExecution) handler;
+        return handlers.get(handlerExecution.getTargetClass());
     }
 }
